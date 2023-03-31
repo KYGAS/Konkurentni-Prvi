@@ -1,9 +1,11 @@
 package DirCrawler;
 
+import JobQueue.*;
 import config.Config;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class DirectoryCrawler implements Runnable {
     private final String corpusDirectoryPrefix;
@@ -11,14 +13,17 @@ public class DirectoryCrawler implements Runnable {
     private final Config config;
 
 
-    private ArrayList<String> directoriesToScan;
+    private final ArrayList<String> directoriesToScan;
     private volatile boolean isRunning;
+
+    private HashMap<String, Long> lastModifiedMap;
 
     public DirectoryCrawler() {
         config = new Config();
         corpusDirectoryPrefix = config.getFileCorpusPrefix();
         scanInterval = config.getDirCrawlerSleepTime();
         directoriesToScan = new ArrayList<>();
+        lastModifiedMap = new HashMap<>();
     }
 
     @Override
@@ -37,23 +42,44 @@ public class DirectoryCrawler implements Runnable {
                 return;
             }
         }
-        System.out.println("Stopped!");
+        System.out.println("Stopped " + this.getClass().getName() );
     }
 
     public void stop(){
         isRunning = false;
     }
 
+    public void addDirectory(String path){
+        directoriesToScan.add(path);
+    }
+
+    public void removeDirectory(String path){
+        directoriesToScan.remove(path);
+    }
+
     private void traverseDirectory(File directory) {
-        if (directory == null) return;
+        if (directory == null) {
+            System.out.println("Path can't be null.");
+            removeDirectory(null);
+            return;
+        }
         if (!directory.isDirectory()) {
+            System.out.println("Path is not a directory.");
+            removeDirectory(directory.getName());
             return;
         }
 
         for (File file : directory.listFiles()) {
             if (file.isDirectory() && file.getName().startsWith(corpusDirectoryPrefix)) {
-                // dodaj u jobQueue
-            } else if (file.isFile()) {
+
+                if(lastModifiedMap.containsKey(file.getPath()))
+                    if(lastModifiedMap.get(file.getPath()) == file.lastModified()) continue;
+
+                JobQueue.addJob(new FileJob());
+                lastModifiedMap.put(file.getPath(), file.lastModified());
+
+            }
+            else if (file.isFile()) {
                 // zabelezi zadnje menjanje ( datum )
             }
         }

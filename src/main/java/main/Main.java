@@ -20,7 +20,7 @@ public class Main {
             System.out.println("Config doesn't exist.");
         }
         if(config == null){
-            exitApp("Config loader error!");
+            exitApp("Config loader error!", true);
         }
         else {
             System.out.println("App config loaded...");
@@ -40,12 +40,16 @@ public class Main {
             directoryCrawler = null;
         }
         if(directoryCrawler == null){
-            exitApp("Directory crawler error!");
+            exitApp("Directory crawler error!", true);
         }
         else {
             System.out.println("Directory crawler loaded...");
         }
         // ---------------------------------- Loaded Directory Crawler
+
+
+
+
 
 
 
@@ -62,7 +66,7 @@ public class Main {
             commandHandler = null;
         }
         if(commandHandler == null){
-            exitApp("Command handler couldn't be created!");
+            exitApp("Command handler couldn't be created!", true);
         }
         else {
             System.out.println("Command handler created!");
@@ -70,12 +74,12 @@ public class Main {
             commandHandler.beginInputRead();
         }
         // ---------------------------------- Created a command handler
-        exitApp("Application closed!");
+        exitApp("Application closed!", false);
     }
 
 
-    private static void exitApp(String message){
+    private static void exitApp(String message, boolean forceStop){
         System.out.println(message);
-        System.exit(0);
+        if(forceStop) System.exit(0);
     }
 }

@@ -1,5 +1,8 @@
 package cli;
 
+import DirCrawler.DirectoryCrawler;
+import JobQueue.*;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -16,13 +19,26 @@ public class CommandHandler {
             case "ad" -> {
                 if (parts.length >= 2) {
                     String path = parseStringParameter(command.substring(cmd.length() + 1));
-                    System.out.println("Added : " + path);
-                } else {
-                    System.out.println("Invalid parameter for ad command");
+                    System.out.println("Directory added : " + path);
+                    for(Object component : runningObjects){
+                        if(component instanceof DirectoryCrawler){
+                            ((DirectoryCrawler) component).addDirectory(path);
+                        }
+                    }
+                }
+                else {
+                    System.out.println("Invalid parameter length for ad command");
                 }
             }
             case "aw" -> {
-                // TODO: Implement add web crawler
+                if (parts.length >= 2) {
+                    String path = parseStringParameter(command.substring(cmd.length() + 1));
+                    System.out.println("Website added : " + path);
+                    JobQueue.addJob(new WebJob());
+                }
+                else {
+                    System.out.println("Invalid parameter length for aw command");
+                }
             }
             case "get" -> {
                 // TODO: Implement blocking retrieve result
@@ -43,13 +59,12 @@ public class CommandHandler {
 
     public void beginInputRead(){
         Scanner scanner = new Scanner(System.in);
-        CommandHandler commandHandler = new CommandHandler();
 
         String command = "";
         while (!command.startsWith("stop")) {
             System.out.print("Enter command: ");
             command = scanner.nextLine();
-            commandHandler.handleCommand(command);
+            handleCommand(command);
         }
         System.out.println("Stopping command handler!");
     }
