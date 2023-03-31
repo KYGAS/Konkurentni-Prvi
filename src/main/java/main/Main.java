@@ -1,6 +1,7 @@
 package main;
 
 import DirCrawler.DirectoryCrawler;
+import JobDispatcher.JobDispatcher;
 import cli.CommandHandler;
 import config.Config;
 
@@ -47,10 +48,25 @@ public class Main {
         }
         // ---------------------------------- Loaded Directory Crawler
 
-
-
-
-
+        // ---------------------------------- Loading Job Dispatcher
+        Thread jobDispatcherThread;
+        JobDispatcher jobDispatcher;
+        System.out.println("Loading job dispatcher...");
+        try{
+            jobDispatcher = new JobDispatcher();
+            jobDispatcherThread = new Thread(jobDispatcher);
+            jobDispatcherThread.start();
+        }
+        catch (Exception ignored){
+            jobDispatcher = null;
+        }
+        if(jobDispatcher == null){
+            exitApp("Job Dispatcher error!", true);
+        }
+        else {
+            System.out.println("Job Dispatcher loaded...");
+        }
+        // ---------------------------------- Loaded Job Dispatcher
 
 
 
@@ -71,6 +87,7 @@ public class Main {
         else {
             System.out.println("Command handler created!");
             commandHandler.addRunningObject(directoryCrawler);
+            commandHandler.addRunningObject(jobDispatcher);
             commandHandler.beginInputRead();
         }
         // ---------------------------------- Created a command handler
