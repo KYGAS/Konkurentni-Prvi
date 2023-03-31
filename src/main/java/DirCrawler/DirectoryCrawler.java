@@ -2,6 +2,7 @@ package DirCrawler;
 
 import JobQueue.*;
 import config.Config;
+import utils.Notifier;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -42,7 +43,7 @@ public class DirectoryCrawler implements Runnable {
                 return;
             }
         }
-        System.out.println("Stopped " + this.getClass().getName() );
+        Notifier.notifyObjectStopped(this);
     }
 
     public void stop(){
