@@ -39,7 +39,7 @@ public class DirectoryCrawler implements Runnable {
                 Thread.sleep(scanInterval);
             }
             catch (InterruptedException e) {
-                System.out.println("Directory Crawler prekinut.");
+                Notifier.notifyObjectStopped(this);
                 return;
             }
         }
