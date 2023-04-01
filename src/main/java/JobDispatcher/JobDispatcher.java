@@ -1,6 +1,8 @@
 package JobDispatcher;
 
 import JobQueue.*;
+import Jobs.Pools.File;
+import Jobs.Pools.Web;
 import utils.Notifier;
 
 import static JobQueue.JobQueue.jobBlockingQueue;
@@ -11,6 +13,10 @@ public class JobDispatcher implements Runnable {
 
     @Override
     public void run() {
+
+        innitFilePool();
+        innitWebPool();
+
         isRunning = true;
         while (isRunning) {
             try {
@@ -23,6 +29,7 @@ public class JobDispatcher implements Runnable {
                     }
                     case "WebJob" -> {
                         System.out.println("New Web Job!");
+                        Web.queueWebJob(((WebJob) job));
                     }
                     default -> {
                         System.out.println("Invalid Job");
@@ -30,7 +37,7 @@ public class JobDispatcher implements Runnable {
                 }
             }
             catch (InterruptedException e) {
-                System.out.println("JobDispatcherThread was interrupted: " + e.getMessage());
+                Notifier.notifyForceStop(this);
                 return;
             }
         }
@@ -39,6 +46,14 @@ public class JobDispatcher implements Runnable {
 
     public void stop(){
         isRunning = false;
+    }
+
+    private void innitWebPool(){
+        new Web();
+    }
+
+    private void innitFilePool(){
+        new File();
     }
 
     public JobDispatcher() {
