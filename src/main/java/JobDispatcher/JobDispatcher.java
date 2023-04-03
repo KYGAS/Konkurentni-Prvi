@@ -28,8 +28,11 @@ public class JobDispatcher implements Runnable {
                         System.out.println("New File Job!");
                     }
                     case "WebJob" -> {
-                        System.out.println("New Web Job!");
                         Web.queueWebJob(((WebJob) job));
+                    }
+                    case "AppStop" -> {
+                        Web.queueWebJob((WebJob) job);
+                        // TODO : add file job here
                     }
                     default -> {
                         System.out.println("Invalid Job");
