@@ -2,6 +2,7 @@ package main;
 
 import DirCrawler.DirectoryCrawler;
 import JobDispatcher.JobDispatcher;
+import ResultRetriever.Retriever.WebRetriever;
 import cli.CommandHandler;
 import config.Config;
 
@@ -69,7 +70,7 @@ public class Main {
         // ---------------------------------- Loaded Job Dispatcher
 
 
-
+        WebRetriever webRetriever = new WebRetriever();
 
 
         // ---------------------------------- Creating a command handler
