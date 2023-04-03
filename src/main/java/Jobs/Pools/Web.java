@@ -17,8 +17,7 @@ public class Web {
     public static void queueWebJob(WebJob webJob){
         executorService.submit(
                 new Jobs.Scanners.Web(
-                        webJob.path,
-                        webJob.hops
+                        webJob
                 )
         );
     }
