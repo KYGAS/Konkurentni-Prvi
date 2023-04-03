@@ -31,4 +31,12 @@ public class WebScanResult implements Result{
         );
     }
 
+    public void printObject(){
+        System.out.println("{");
+        for (String keyword : result.keySet()){
+            System.out.println("\"" + keyword + "\" : " + result.get(keyword) + ",");
+        }
+        System.out.println("}");
+    }
+
 }

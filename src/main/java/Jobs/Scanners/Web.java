@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Phaser;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Web implements Runnable{
     String path;
@@ -25,8 +26,12 @@ public class Web implements Runnable{
     Phaser phaser;
     HashMap<String, Integer> webScanResult;
 
+    private static volatile boolean isRunning = true;
+    private static ArrayList<Phaser> phaserArrayList = new ArrayList<>();
+
     public static List<String> visitedList = new ArrayList<>();
 
+    public Web() {}
 
     public Web(String path, Integer hops) {
         this.path = path;
@@ -42,33 +47,46 @@ public class Web implements Runnable{
 
     @Override
     public void run() {
-        String[] keywords = new Config().getKeywords();
-        Document doc = null;
-        String text = null;
+        if(isRunning) {
+            String[] keywords = new Config().getKeywords();
+            Document doc = null;
+            String text = null;
 
-        try {
-            doc = Jsoup.connect(path).get();
-            text = doc.body().text();
-        } catch (IOException  e) {
-            if(parentJob != null) {
-                parentJob.finishChildJob();
-                return;
+            try {
+                System.out.println("Starting web scan for\nweb|" + this.path);
+                doc = Jsoup.connect(path).get();
+                text = doc.body().text();
+            } catch (IOException e) {
+                if (parentJob != null) {
+                    parentJob.finishChildJob();
+                    return;
+                }
+            }
+
+            if(isRunning) {
+                for (String keyword : keywords) {
+                    countWord(text, keyword);
+                }
+            }
+
+            if(isRunning) {
+                if (hops > 0) createWebJobs(doc);
+                else {
+                    if (parentJob != null) {
+                        compileResult(false);
+                        parentJob.finishChildJob();
+                    } else compileResult(true);
+                }
+            }
+            else {
+                if (parentJob != null) {
+                    parentJob.phaser.bulkRegister(parentJob.phaser.getUnarrivedParties());
+                }
             }
         }
-
-        for(String keyword : keywords){
-            countWord(text, keyword);
+        else if (parentJob != null) {
+            parentJob.phaser.bulkRegister(parentJob.phaser.getUnarrivedParties());
         }
-
-        if(hops > 0) createWebJobs(doc);
-        else {
-            if(parentJob != null) {
-                compileResult(false);
-                parentJob.finishChildJob();
-            }
-            else compileResult(true);
-        }
-
     }
 
     public void countWord(String text, String keyword){
@@ -88,17 +106,21 @@ public class Web implements Runnable{
     public void createWebJobs(Document doc){
         Elements elements = doc.select("a[href]");
 
+        System.out.println("test1");
+
         phaser = new Phaser(1);
+        phaserArrayList.add(phaser);
         for(Element element : elements){
+            if(!isRunning){
+                break;
+            }
             String url = element.attr("abs:href");
             if(url.startsWith("http")) {
                 if(visitedList.contains(url)) continue;
                 visitedList.add(url);
-                System.out.println("Adding url : " + url);
                 phaser.register();
                 JobQueue.addJob(new WebJob(url, this.hops - 1, this));
             }
-            System.out.println(phaser.getUnarrivedParties());
         }
 
         phaser.arriveAndAwaitAdvance();
@@ -108,32 +130,29 @@ public class Web implements Runnable{
             parentJob.finishChildJob();
         }
         else compileResult(true);
-        // All jobs on this domain have completed if parent == null;
     }
 
     private void compileResult(boolean complete){
+        if(!isRunning) return;
 
         String domain = Web.getDomain(this.path);
         WebScanResult webScanResult_Object = new WebScanResult(
                 webScanResult,
                 complete
         );
-
         WebRetriever.addResult(domain, webScanResult_Object);
-
-        if(complete){
-            System.out.println("Web Job complete!");
-            for(String keys : WebRetriever.results.keySet()){
-                System.out.println(keys);
-            }
-            for(String keyword : new Config().getKeywords()) {
-                System.out.println(keyword + "-" + WebRetriever.results.get(domain).result.get(keyword));
-            }
-        }
     }
 
     public void finishChildJob(){
         phaser.arriveAndDeregister();
+    }
+
+    public void stop(){
+        isRunning = false;
+        for(Phaser phaser1 : phaserArrayList){
+            int parties = phaser1.getUnarrivedParties();
+            for(int i = 0; i< parties; i++) phaser1.arriveAndDeregister();
+        }
     }
 
     public static String getDomain(String path){

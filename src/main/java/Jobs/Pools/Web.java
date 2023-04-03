@@ -1,5 +1,6 @@
 package Jobs.Pools;
 
+import JobQueue.JobQueue;
 import JobQueue.WebJob;
 import utils.Notifier;
 
@@ -22,13 +23,10 @@ public class Web {
         );
     }
 
-    public static void closeWebJobs(){
+    public void stop(){
         try {
-            if (executorService.awaitTermination(Integer.MAX_VALUE, TimeUnit.SECONDS)) {
-                Notifier.notifyObjectStopped(new Web());
-            } else {
-                Notifier.notifyForceStop(new Web());
-            }
+            executorService.shutdown();
+            Notifier.notifyObjectStopped(new Web());
         }
         catch (Exception ignored){
             Notifier.notifyObjectStopped(new Web());

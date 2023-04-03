@@ -2,6 +2,8 @@ package main;
 
 import DirCrawler.DirectoryCrawler;
 import JobDispatcher.JobDispatcher;
+import Jobs.Scanners.File;
+import Jobs.Scanners.Web;
 import ResultRetriever.Retriever.WebRetriever;
 import cli.CommandHandler;
 import config.Config;
@@ -89,6 +91,10 @@ public class Main {
             System.out.println("Command handler created!");
             commandHandler.addRunningObject(directoryCrawler);
             commandHandler.addRunningObject(jobDispatcher);
+            commandHandler.addRunningObject(jobDispatcher.innitWebPool());
+            commandHandler.addRunningObject(jobDispatcher.innitFilePool());
+            commandHandler.addRunningObject(jobDispatcher.getWebScanner());
+            commandHandler.addRunningObject(jobDispatcher.getFileScanner());
             commandHandler.beginInputRead();
         }
         // ---------------------------------- Created a command handler

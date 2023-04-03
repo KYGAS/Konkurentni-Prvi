@@ -34,7 +34,6 @@ public class CommandHandler {
             case "aw" -> {
                 if (parts.length >= 2) {
                     String path = parseStringParameter(command.substring(cmd.length() + 1));
-                    System.out.println("Website added : " + path);
                     JobQueue.addJob(new WebJob(path, new Config().getHopCount(), null));
                 }
                 else {

@@ -13,10 +13,6 @@ public class JobDispatcher implements Runnable {
 
     @Override
     public void run() {
-
-        innitFilePool();
-        innitWebPool();
-
         isRunning = true;
         while (isRunning) {
             try {
@@ -31,8 +27,7 @@ public class JobDispatcher implements Runnable {
                         Web.queueWebJob(((WebJob) job));
                     }
                     case "AppStop" -> {
-                        Web.queueWebJob((WebJob) job);
-                        // TODO : add file job here
+                        System.out.println("Received stop job!");
                     }
                     default -> {
                         System.out.println("Invalid Job");
@@ -49,15 +44,18 @@ public class JobDispatcher implements Runnable {
 
     public void stop(){
         isRunning = false;
+        jobBlockingQueue.clear();
+        jobBlockingQueue.offer(new AppStop());
     }
 
-    private void innitWebPool(){
-        new Web();
+    public Web innitWebPool() { return new Web(); }
+
+    public File innitFilePool(){
+        return new File();
     }
 
-    private void innitFilePool(){
-        new File();
-    }
+    public Jobs.Scanners.Web getWebScanner(){return new Jobs.Scanners.Web();}
+    public Jobs.Scanners.File getFileScanner(){return new Jobs.Scanners.File();}
 
     public JobDispatcher() {
 
