@@ -5,10 +5,10 @@ import ResultRetriever.Result.WebScanResult;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class WebRetriever implements Retriever{
-    public static ConcurrentHashMap<String, WebScanResult> results;
+    public static ConcurrentHashMap<String, WebScanResult> results = null;
 
     public WebRetriever() {
-        results = new ConcurrentHashMap<>();
+        if(results == null) results = new ConcurrentHashMap<>();
     }
 
     public static void addResult(String domain, WebScanResult result){

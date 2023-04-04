@@ -4,6 +4,8 @@ import DirCrawler.DirectoryCrawler;
 import JobDispatcher.JobDispatcher;
 import Jobs.Scanners.File;
 import Jobs.Scanners.Web;
+import ResultRetriever.ResultRetriever;
+import ResultRetriever.Retriever.FileRetriever;
 import ResultRetriever.Retriever.WebRetriever;
 import cli.CommandHandler;
 import config.Config;
@@ -72,12 +74,30 @@ public class Main {
         // ---------------------------------- Loaded Job Dispatcher
 
 
-        WebRetriever webRetriever = new WebRetriever();
+        // ---------------------------------- Loading Result Retriever
+        Thread resultRetrieverThread;
+        ResultRetriever resultRetriever;
+        System.out.println("Loading result retriever...");
+        try{
+            resultRetriever = new ResultRetriever();
+            resultRetrieverThread = new Thread(resultRetriever);
+            resultRetrieverThread.start();
+        }
+        catch (Exception ignored){
+            resultRetriever = null;
+        }
+        if(jobDispatcher == null){
+            exitApp("Result retriever error!", true);
+        }
+        else {
+            System.out.println("Result retreiver loaded...");
+        }
+        // ---------------------------------- Loaded Result Retriever
 
 
         // ---------------------------------- Creating a command handler
         CommandHandler commandHandler;
-        System.out.println("Loading directory crawler...");
+        System.out.println("Loading command handler...");
         try{
             commandHandler = new CommandHandler();
         }
@@ -95,6 +115,7 @@ public class Main {
             commandHandler.addRunningObject(jobDispatcher.innitFilePool());
             commandHandler.addRunningObject(jobDispatcher.getWebScanner());
             commandHandler.addRunningObject(jobDispatcher.getFileScanner());
+            commandHandler.addRunningObject(resultRetriever);
             commandHandler.beginInputRead();
         }
         // ---------------------------------- Created a command handler

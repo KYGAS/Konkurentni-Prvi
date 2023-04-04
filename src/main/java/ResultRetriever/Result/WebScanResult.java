@@ -19,10 +19,16 @@ public class WebScanResult implements Result{
         }
 
         for(String key : webScanResult2.result.keySet()){
-            if(result.containsKey(key)){
-                result.put(key, webScanResult2.result.get(key) + result.get(key));
+            try {
+                if (result.containsKey(key)) {
+                    result.put(key, webScanResult2.result.get(key) + (result.get(key) == null?0:result.get(key)) );
+                } else result.put(key, webScanResult1.result.get(key));
+            }catch (Exception e){
+                System.out.println(webScanResult1.result.get(key));
+                System.out.println(webScanResult2.result.get(key));
+                System.out.println(result.get(key));
+                System.out.println(key);
             }
-            else result.put(key, webScanResult1.result.get(key));
         }
 
         return new WebScanResult(

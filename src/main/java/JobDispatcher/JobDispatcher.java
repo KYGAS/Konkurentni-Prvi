@@ -22,6 +22,7 @@ public class JobDispatcher implements Runnable {
                 switch (job.getClass().getSimpleName()) {
                     case "FileJob" -> {
                         System.out.println("New File Job!");
+                        File.queueFileJob((FileJob) job);
                     }
                     case "WebJob" -> {
                         Web.queueWebJob(((WebJob) job));

@@ -12,6 +12,7 @@ public class DirectoryCrawler implements Runnable {
     private final String corpusDirectoryPrefix;
     private final long scanInterval;
     private final Config config;
+    private static final Object lock1 = new Object();
 
 
     private final ArrayList<String> directoriesToScan;
@@ -31,7 +32,7 @@ public class DirectoryCrawler implements Runnable {
     public void run() {
         isRunning = true;
         while (isRunning) {
-            for (String directory : directoriesToScan) {
+            for (String directory : new ArrayList<>(directoriesToScan)) {
                 traverseDirectory(new File(directory));
             }
 
@@ -51,11 +52,15 @@ public class DirectoryCrawler implements Runnable {
     }
 
     public void addDirectory(String path){
-        directoriesToScan.add(path);
+        synchronized (lock1) {
+            directoriesToScan.add(path);
+        }
     }
 
     public void removeDirectory(String path){
-        directoriesToScan.remove(path);
+        synchronized (lock1) {
+            directoriesToScan.remove(path);
+        }
     }
 
     private void traverseDirectory(File directory) {
@@ -76,7 +81,7 @@ public class DirectoryCrawler implements Runnable {
                 if(lastModifiedMap.containsKey(file.getPath()))
                     if(lastModifiedMap.get(file.getPath()) == file.lastModified()) continue;
 
-                JobQueue.addJob(new FileJob());
+                JobQueue.addJob(new FileJob(file.getPath()));
                 lastModifiedMap.put(file.getPath(), file.lastModified());
 
             }

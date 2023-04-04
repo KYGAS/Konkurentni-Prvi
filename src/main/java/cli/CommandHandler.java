@@ -2,6 +2,7 @@ package cli;
 
 import DirCrawler.DirectoryCrawler;
 import JobQueue.*;
+import ResultRetriever.ResultRetriever;
 import config.Config;
 
 import java.lang.reflect.InvocationTargetException;
@@ -20,7 +21,6 @@ public class CommandHandler {
             case "ad" -> {
                 if (parts.length >= 2) {
                     String path = parseStringParameter(command.substring(cmd.length() + 1));
-                    System.out.println("Directory added : " + path);
                     for(Object component : runningObjects){
                         if(component instanceof DirectoryCrawler){
                             ((DirectoryCrawler) component).addDirectory(path);
@@ -41,10 +41,26 @@ public class CommandHandler {
                 }
             }
             case "get" -> {
-                // TODO: Implement blocking retrieve result
+                cmd = command.substring(cmd.length() + 1);
+                String pool = cmd.split("\\|")[0];
+                String source = cmd.substring(pool.length() + 1);
+
+                for(Object component : runningObjects){
+                    if(component instanceof ResultRetriever){
+                        ((ResultRetriever) component).get(pool, source);
+                    }
+                }
             }
             case "query" -> {
-                // TODO: Implement non blocking retrieve result
+                cmd = command.substring(cmd.length() + 1);
+                String pool = cmd.split("\\|")[0];
+                String source = cmd.substring(pool.length() + 1);
+
+                for(Object component : runningObjects){
+                    if(component instanceof ResultRetriever){
+                        ((ResultRetriever) component).fetch(pool, source);
+                    }
+                }
             }
             case "cws" -> {
                 // TODO: Implement clear web cache

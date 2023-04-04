@@ -106,8 +106,6 @@ public class Web implements Runnable{
     public void createWebJobs(Document doc){
         Elements elements = doc.select("a[href]");
 
-        System.out.println("test1");
-
         phaser = new Phaser(1);
         phaserArrayList.add(phaser);
         for(Element element : elements){
