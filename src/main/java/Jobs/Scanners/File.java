@@ -73,14 +73,18 @@ public class File implements Runnable{
             // we have content in <corpus_content>
 
         if(!isRunning) return;
-            String corpus = directory.getName();
-            List<String> keywords = List.of(new Config().getKeywords());
-            divider = new Jobs.Divider.File(corpus_content.toString(), keywords);
-            HashMap<String, Integer> results = pool.invoke(divider);
+
+        String corpus = directory.getName();
+        System.out.println(corpus);
+        FileRetriever.addResult(corpus, new FileScanResult(null, false));
+        List<String> keywords = List.of(new Config().getKeywords());
+        divider = new Jobs.Divider.File(corpus_content.toString(), keywords);
+        HashMap<String, Integer> results = pool.invoke(divider);
 
         if(!isRunning) return;
-            //FileRetriever.results.remove(path);
-            FileRetriever.addResult(corpus, new FileScanResult(results, true));
+
+        //FileRetriever.results.remove(path);
+        FileRetriever.addResult(corpus, new FileScanResult(results, true));
     }
 
     public void stop(){

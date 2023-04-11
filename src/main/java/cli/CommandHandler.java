@@ -41,32 +41,40 @@ public class CommandHandler {
                 }
             }
             case "get" -> {
-                cmd = command.substring(cmd.length() + 1);
-                String pool = cmd.split("\\|")[0];
-                String source = cmd.substring(pool.length() + 1);
+                try {
+                    cmd = command.substring(cmd.length() + 1);
+                    String pool = cmd.split("\\|")[0];
+                    String source = cmd.substring(pool.length() + 1);
 
-                for(Object component : runningObjects){
-                    if(component instanceof ResultRetriever){
-                        ((ResultRetriever) component).get(pool, source);
+                    for(Object component : runningObjects){
+                        if(component instanceof ResultRetriever){
+                            ((ResultRetriever) component).get(pool, source);
+                        }
                     }
+                }catch (Exception e){
+                    System.out.println("Query arguments were invalid.");
                 }
             }
             case "query" -> {
-                cmd = command.substring(cmd.length() + 1);
-                String pool = cmd.split("\\|")[0];
-                String source = cmd.substring(pool.length() + 1);
+                try {
+                    cmd = command.substring(cmd.length() + 1);
+                    String pool = cmd.split("\\|")[0];
+                    String source = cmd.substring(pool.length() + 1);
 
-                for(Object component : runningObjects){
-                    if(component instanceof ResultRetriever){
-                        ((ResultRetriever) component).fetch(pool, source);
+                    for (Object component : runningObjects) {
+                        if (component instanceof ResultRetriever) {
+                            ((ResultRetriever) component).fetch(pool, source);
+                        }
                     }
+                }catch (Exception e){
+                    System.out.println("Query arguments were invalid.");
                 }
             }
             case "cws" -> {
-                // TODO: Implement clear web cache
+                ResultRetriever.cache.remove("web");
             }
             case "cfs" -> {
-                // TODO: Implement clear file cache
+                ResultRetriever.cache.remove("file");
             }
             case "stop" -> stopApplication();
             default -> System.out.println("Unknown command: " + cmd);
